@@ -20,14 +20,22 @@ const SECRET_KEY = 'V//9oMX4MY3S3283rwwxicEqr0AWDmVuT1Z863WY4QTGsljPdmfdzosker0m
 // Routes
 app.post('/register', async (req, res) => {
     const { email, password } = req.body;
+    
+    if (!email || !password) {
+        return res.status(400).send({ error: 'Email and password are required' });
+    }
+
     const hashedPassword = await bcrypt.hash(password, 10);
+
     try {
         await pool.query('INSERT INTO users (email, password) VALUES ($1, $2)', [email, hashedPassword]);
         res.status(201).send({ message: 'User registered successfully' });
     } catch (err) {
+        console.error('Registration error:', err); // Log the error for debugging
         res.status(400).send({ error: 'Registration failed' });
     }
 });
+
 
 app.post('/login', async (req, res) => {
     const { email, password } = req.body;
